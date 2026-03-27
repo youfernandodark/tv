@@ -21,7 +21,7 @@
       "subtitles": ["pt", "en", "es"],
       "poster_url": "https://via.placeholder.com/300x450?text=Godfather",
       "backdrop_url": "https://via.placeholder.com/1280x720?text=Godfather+Backdrop",
-      "stream_url": "http://example-vod.com/movies/godfather/index.m3u8",
+      "stream_url": "https://video.wixstatic.com/video/db47f8_4671182ae2b347e888c6b5214bf9286d/720p/mp4/file.mp4",
       "quality": ["720p", "1080p"],
       "content_rating": "16",
       "tags": ["clássico", "máfia", "oscar"]
