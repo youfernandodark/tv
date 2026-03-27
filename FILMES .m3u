@@ -1,8 +1,8 @@
 #EXTM3U
 
-# -- Filmes (VOD) com Metadados --
-#EXTINF:-1 tvg-vod="true" tvg-title="O Poderoso Chefão" tvg-year="1972" tvg-genre="Drama,Crime" tvg-rating="9.2" tvg-poster="https://via.placeholder.com/300x450?text=Godfather" tvg-description="A saga da família Corleone em Nova York.",O Poderoso Chefão (1972)
+# -- Filmes (VOD) --
+#EXTINF:-1 tvg-id="poderoso_chefao_1972" tvg-name="O Poderoso Chefão" tvg-logo="https://via.placeholder.com/300x450?text=Godfather" group-title="Clássicos",O Poderoso Chefão (1972)
 http://example-vod.com/movies/godfather/index.m3u8
 
-#EXTINF:-1 tvg-vod="Terror_na_Estrada" tvg-title="Terror na Estrada" tvg-year="2014" tvg-genre="Ficção Científica,Aventura" tvg-rating="8.6" tvg-poster="https://via.placeholder.com/300x450?text=Interstellar" tvg-description="Uma equipe de astronautas viaja através de um buraco de minhoca.",Terror na Estrada
-A Bailarinahttps://video.wixstatic.com/video/db47f8_4671182ae2b347e888c6b5214bf9286d/720p/mp4/file.mp4
+#EXTINF:-1 tvg-id="Terror_na_Estrada" tvg-name="Terror na Estrada" tvg-logo="https://via.placeholder.com/300x450?text=Terror" group-title="Suspense",Terror na Estrada
+https://video.wixstatic.com/video/db47f8_4671182ae2b347e888c6b5214bf9286d/720p/mp4/file.mp4
