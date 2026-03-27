@@ -1,0 +1,30 @@
+{
+  "version": "1.0",
+  "last_updated": "2026-03-27",
+  "content_type": "educational_sample",
+  "movies": [
+    {
+      "id": "movie_001",
+      "title": "O Poderoso Chefão",
+      "original_title": "The Godfather",
+      "year": 1972,
+      "genre": ["Drama", "Crime"],
+      "director": "Francis Ford Coppola",
+      "cast": ["Marlon Brando", "Al Pacino", "James Caan"],
+      "duration_minutes": 175,
+      "rating": {
+        "imdb": 9.2,
+        "rotten_tomatoes": 97
+      },
+      "synopsis": "A saga da família Corleone em Nova York, explorando poder, lealdade e família.",
+      "language": "en",
+      "subtitles": ["pt", "en", "es"],
+      "poster_url": "https://via.placeholder.com/300x450?text=Godfather",
+      "backdrop_url": "https://via.placeholder.com/1280x720?text=Godfather+Backdrop",
+      "stream_url": "http://example-vod.com/movies/godfather/index.m3u8",
+      "quality": ["720p", "1080p"],
+      "content_rating": "16",
+      "tags": ["clássico", "máfia", "oscar"]
+    }
+  ]
+}
