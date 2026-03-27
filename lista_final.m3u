@@ -20,6 +20,10 @@ https://cdn1embed.site/gjqmlMjWWsbtspPel8XOFDWKWLCR/index.m3u8
 https://cdn1embed.site/Ln03ovXjYrcrdspYMar2jiIqZlhQ3biawY/index.m3u8
 #EXTINF:-1 group-title="TV ABERTA" tvg-logo="https://embedcanaisonline.com/images/bandsp.png",Band sp
 https://cdn1embed.site/QLxEJHwBVJbndspvwSDrtqohUmuhV/index.m3u8
+# -- Filmes (VOD) --
+#EXTINF:-1 tvg-id="Terror_na_Estrada" tvg-name="Terror na Estrada" tvg-logo="https://via.placeholder.com/300x450?text=Terror" group-title="Suspense",Terror na Estrada
+https://video.wixstatic.com/video/db47f8_4671182ae2b347e888c6b5214bf9286d/720p/mp4/file.mp4
+
 Van Helsing - Temporada 01
 #EXTINF:-1 tvg-id="VanHelsingS01E01" tvg-logo="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT60pSWJ0v7TbOifqNJO3pixUBYNuX4uhu9D8hxPH3FDg&s=10" group-title="Van Helsing", Van Helsing S01 E01 - Ajude-me
 https://video.wixstatic.com/video/8d3786_2686dbcc3aff4cd580192338d6d80e8a/360p/mp4/file.mp4
