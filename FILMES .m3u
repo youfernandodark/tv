@@ -4,5 +4,5 @@
 #EXTINF:-1 tvg-vod="true" tvg-title="O Poderoso Chefão" tvg-year="1972" tvg-genre="Drama,Crime" tvg-rating="9.2" tvg-poster="https://via.placeholder.com/300x450?text=Godfather" tvg-description="A saga da família Corleone em Nova York.",O Poderoso Chefão (1972)
 http://example-vod.com/movies/godfather/index.m3u8
 
-#EXTINF:-1 tvg-vod="true" tvg-title="Interestelar" tvg-year="2014" tvg-genre="Ficção Científica,Aventura" tvg-rating="8.6" tvg-poster="https://via.placeholder.com/300x450?text=Interstellar" tvg-description="Uma equipe de astronautas viaja através de um buraco de minhoca.",Interestelar (2014)
-http://example-vod.com/movies/interstellar/index.m3u8
+#EXTINF:-1 tvg-vod="Terror_na_Estrada" tvg-title="Terror na Estrada" tvg-year="2014" tvg-genre="Ficção Científica,Aventura" tvg-rating="8.6" tvg-poster="https://via.placeholder.com/300x450?text=Interstellar" tvg-description="Uma equipe de astronautas viaja através de um buraco de minhoca.",Terror na Estrada
+A Bailarinahttps://video.wixstatic.com/video/db47f8_4671182ae2b347e888c6b5214bf9286d/720p/mp4/file.mp4
