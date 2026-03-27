@@ -1,1 +1,21 @@
+name: Gerar Minha Lista
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Executar Script
+        run: python organizador.py
+      - name: Guardar Alterações
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add lista_final.m3u
+          git commit -m "Lista atualizada" || exit 0
+          git push
 
