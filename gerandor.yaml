@@ -1,0 +1,27 @@
+name: Gerar Lista Unificada
+
+on:
+  push:
+    branches: [ main ] # Roda toda vez que você der um 'Commit'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Executar script de união
+        run: python gerar_lista.py
+
+      - name: Salvar alterações
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add lista_final.m3u
+          git commit -m "Atualização automática da lista unificada" || exit 0
+          git push
