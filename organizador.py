@@ -1,7 +1,7 @@
 import os
 
 # Configuração: Nome dos arquivos que você já tem no GitHub
-arquivos_origem = ['https://raw.githubusercontent.com/youfernandodark/tv/refs/heads/main/tv_canais.m3u', 'https://raw.githubusercontent.com/youfernandodark/tv/refs/heads/main/FILMES%20.m3u', 'series.m3u']
+arquivos_origem = ['tv_canais.m3u', 'filme.m3u', 'series.m3u']
 arquivo_saida = 'lista_final.m3u'
 
 def unir_listas():
