@@ -8,21 +8,17 @@
       "genre": ["Drama", "Crime", "Thriller"],
       "creator": "Vince Gilligan",
       "cast": ["Bryan Cranston", "Aaron Paul", "Anna Gunn"],
-      "seasons": 5,
+      "seasons_count": 5,
       "total_episodes": 62,
-      "rating": {
-        "imdb": 9.5
-      },
+      "rating_imdb": 9.5,
       "synopsis": "Um professor de química diagnosticado com câncer terminal entra no mundo do tráfico de metanfetamina.",
       "poster_url": "https://via.placeholder.com/300x450?text=Breaking+Bad",
       "seasons_data": [
         {
           "season_number": 1,
-          "episodes": 7,
-          "year": 2008,
-          "episodes_list": [
+          "episodes": [
             {
-              "episode_number": 1,
+              "number": 1,
               "title": "Piloto",
               "duration_minutes": 58,
               "synopsis": "Walter White recebe diagnóstico de câncer e decide produzir metanfetamina.",

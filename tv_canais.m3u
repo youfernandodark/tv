@@ -1,16 +1,16 @@
-6#EXTM3U x-tvg-url="https://example.com/epg.xml"
+#EXTM3U x-tvg-url="https://example.com/epg.xml"
 
-# -- Canais de Notícias (Exemplo Educativo) --
-#EXTINF:-1 tvg-id="CNN_BR" tvg-name="CNN Brasil" tvg-logo="https://via.placeholder.com/150x150?text=CNN" group-title="Notícias",CNN Brasil
+# -- Canais de Notícias --
+#EXTINF:-1 tvg-id="CNN_BR" tvg-logo="https://via.placeholder.com/150x150?text=CNN" group-title="Notícias",CNN Brasil
 http://example-stream.com/cnn_br/index.m3u8
 
-#EXTINF:-1 tvg-id="GLOBONEWS" tvg-name="GloboNews" tvg-logo="https://via.placeholder.com/150x150?text=GloboNews" group-title="Notícias",GloboNews
+#EXTINF:-1 tvg-id="GLOBONEWS" tvg-logo="https://via.placeholder.com/150x150?text=GloboNews" group-title="Notícias",GloboNews
 http://example-stream.com/globonews/index.m3u8
 
 # -- Canais de Esportes --
-#EXTINF:-1 tvg-id="ESPN_BR" tvg-name="ESPN Brasil" tvg-logo="https://via.placeholder.com/150x150?text=ESPN" group-title="Esportes",ESPN Brasil
+#EXTINF:-1 tvg-id="ESPN_BR" tvg-logo="https://via.placeholder.com/150x150?text=ESPN" group-title="Esportes",ESPN Brasil
 http://example-stream.com/espn/index.m3u8
 
 # -- Canais de Entretenimento --
-#EXTINF:-1 tvg-id="MULTISHOW" tvg-name="Multishow" tvg-logo="https://via.placeholder.com/150x150?text=Multishow" group-title="Entretenimento",Multishow
+#EXTINF:-1 tvg-id="MULTISHOW" tvg-logo="https://via.placeholder.com/150x150?text=Multishow" group-title="Entretenimento",Multishow
 http://example-stream.com/multishow/index.m3u8
