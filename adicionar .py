@@ -1,7 +1,7 @@
 import json
 
 # Nome dos arquivos
-arquivo_json = 'FILMES .json'
+arquivo_json = 'filmes.json'
 arquivo_m3u = 'filmes_enriquecido.m3u'
 
 def converter_json_para_m3u():
