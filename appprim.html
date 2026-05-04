@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 Enriquecer M3U com TMDB</title>
+    <style>
+        :root {
+            --bg: #0b0f15;
+            --surface: #151b23;
+            --card: #1c252d;
+            --border: #2d3748;
+            --text: #e2e8f0;
+            --text-secondary: #a0aec0;
+            --accent: #01b4e4;
+            --accent-hover: #0397c4;
+            --gold: #f6c800;
+            --green: #38a169;
+            --red: #e53e3e;
+            --radius: 10px;
+            --radius-sm: 6px;
+            --transition: 0.2s ease;
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{
+            font-family:'Inter',system-ui,-apple-system,sans-serif;
+            background:var(--bg);
+            color:var(--text);
+            min-height:100vh;
+            line-height:1.5;
+            -webkit-font-smoothing:antialiased;
+        }
+        .header{
+            background:var(--surface);
+            border-bottom:1px solid var(--border);
+            padding:14px 24px;
+            display:flex;
+            align-items:center;
+            gap:12px;
+            flex-wrap:wrap;
+            justify-content:space-between;
+            position:sticky;
+            top:0;
+            z-index:50;
+            backdrop-filter:blur(8px);
+        }
+        .logo span{background:linear-gradient(135deg,#01b4e4,#90cea1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+        .btn{
+            padding:8px 16px;
+            border-radius:20px;
+            border:1px solid var(--border);
+            background:var(--surface);
+            color:var(--text);
+            cursor:pointer;
+            font-weight:500;
+            font-size:0.9rem;
+            transition:var(--transition);
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            white-space:nowrap;
+            font-family:inherit;
+        }
+        .btn-primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;}
+        .btn-primary:hover{background:var(--accent-hover);box-shadow:0 4px 12px rgba(1,180,228,0.3);}
+        .btn-outline:hover{border-color:#5a6a7a;color:#fff;}
+        .api-bar{
+            background:#1a202c;
+            border-bottom:1px solid #2d3748;
+            padding:10px 24px;
+            display:flex;
+            align-items:center;
+            gap:10px;
+            flex-wrap:wrap;
+            justify-content:center;
+            transition:all 0.3s;
+        }
+        .api-bar.collapsed{padding:4px 24px;font-size:0.7rem;opacity:0.6;}
+        .api-bar input{
+            padding:8px 14px;
+            border-radius:18px;
+            border:1px solid var(--border);
+            background:#0d1117;
+            color:var(--text);
+            font-size:0.9rem;
+            width:260px;
+            font-family:'SF Mono',Consolas,monospace;
+        }
+        .api-bar input:focus{outline:none;border-color:var(--accent);}
+        .api-status{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;}
+        .api-status.ok{background:var(--green);box-shadow:0 0 8px var(--green);}
+        .api-status.missing{background:var(--red);box-shadow:0 0 8px var(--red);}
+        .container{max-width:1500px;margin:0 auto;padding:20px 24px;}
+        .upload-section{
+            background:var(--surface);
+            border:2px dashed var(--border);
+            border-radius:var(--radius);
+            padding:32px 20px;
+            text-align:center;
+            margin-bottom:24px;
+            cursor:pointer;
+            transition:var(--transition);
+        }
+        .upload-section:hover{border-color:var(--accent);background:#1a2330;}
+        .upload-section.dragover{border-color:var(--accent);background:#1a2d3d;}
+        .upload-section input{display:none;}
+        .upload-icon{font-size:2.8rem;margin-bottom:10px;}
+        .upload-text{font-weight:600;font-size:1rem;}
+        .upload-hint{color:var(--text-secondary);font-size:0.8rem;}
+        .progress-area{display:flex;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap;}
+        .progress-bar-bg{flex:1;min-width:200px;height:8px;background:#1e293b;border-radius:4px;overflow:hidden;}
+        .progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#01b4e4,#90cea1);border-radius:4px;transition:width 0.3s;}
+        .progress-text{font-weight:600;font-size:0.9rem;}
+        .table-container{overflow-x:auto;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:24px;}
+        table{width:100%;border-collapse:collapse;font-size:0.82rem;}
+        th{background:#1a2330;padding:10px 8px;text-align:left;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);white-space:nowrap;}
+        td{padding:8px;border-bottom:1px solid #232d3a;vertical-align:middle;}
+        .poster-thumb{width:40px;height:60px;object-fit:cover;border-radius:4px;background:#1a202c;}
+        .no-poster-thumb{width:40px;height:60px;background:#1a202c;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#4a5568;flex-shrink:0;}
+        .url-cell a{color:#6ea8d8;text-decoration:none;font-family:monospace;font-size:0.7rem;}
+        .rating-badge{background:#2d3748;color:var(--gold);padding:2px 6px;border-radius:10px;font-weight:700;font-size:0.75rem;white-space:nowrap;}
+        .category-badge{padding:2px 8px;border-radius:10px;font-size:0.75rem;font-weight:600;white-space:nowrap;}
+        .category-badge.movie{background:#1e3a5f;color:#63b3ed;}
+        .category-badge.tv{background:#1e3a3a;color:#68d391;}
+        .genre-badge{display:inline-block;padding:2px 6px;margin:2px;border-radius:12px;font-size:0.7rem;font-weight:500;background:#2d3748;color:#cbd5e0;white-space:nowrap;}
+        .genre-badge:hover{background:#4a5568;}
+        .genres-cell{max-width:180px;display:flex;flex-wrap:wrap;gap:2px;}
+        .desc-cell{max-width:180px;font-size:0.8rem;}
+        .desc-preview{color:var(--text-secondary);cursor:help;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+        .desc-preview:hover{color:var(--text);}
+        .download-btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+        .toast-container{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+        .toast{background:#2d3748;color:#fff;padding:12px 20px;border-radius:24px;font-size:0.9rem;box-shadow:0 8px 20px rgba(0,0,0,0.4);animation:slideIn 0.3s, fadeOut 0.3s 2.5s forwards;border:1px solid #4a5568;}
+        .toast.success{border-color:var(--green);}
+        @keyframes slideIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+        @keyframes fadeOut{from{opacity:1}to{opacity:0;transform:translateY(10px)}}
+        .footer{text-align:center;padding:16px;color:#4a5568;font-size:0.75rem;border-top:1px solid var(--border);}
+        .btn:disabled{opacity:0.5;pointer-events:none;}
+        @media (max-width:768px){
+            .desc-cell, .genres-cell{max-width:120px;}
+            table{font-size:0.7rem;}
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo"><span>🎬 M3U + TMDB</span></div>
+        <button class="btn btn-outline" id="toggleApiBtn">⚙️ Chave API</button>
+    </header>
+
+    <div class="api-bar" id="apiBar">
+        <label style="font-weight:600;font-size:0.9rem;color:#a0aec0;">
+            <span class="api-status missing" id="apiDot"></span> Chave TMDB:
+        </label>
+        <input type="text" id="apiKeyInput" placeholder="Cole sua chave v3 aqui..." autocomplete="off">
+        <button class="btn btn-primary" id="saveApiBtn">💾 Salvar</button>
+        <button class="btn btn-outline" id="testApiBtn">🔍 Testar</button>
+    </div>
+
+    <main class="container">
+        <div class="upload-section" id="uploadArea">
+            <div class="upload-icon">📂</div>
+            <div class="upload-text">Clique ou arraste seu arquivo <strong>.m3u</strong> aqui</div>
+            <div class="upload-hint">As tags existentes serão preservadas e enriquecidas com TMDB</div>
+            <input type="file" id="fileInput" accept=".m3u,.m3u8,.txt">
+        </div>
+
+        <div id="processingArea" style="display:none;">
+            <div class="progress-area">
+                <span class="progress-text" id="progressLabel">0 / 0 processados</span>
+                <div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div>
+                <button class="btn btn-outline" id="cancelBtn" style="display:none;">⏹️ Parar</button>
+                <button class="btn btn-primary" id="processBtn" style="display:none;">🚀 Iniciar Busca TMDB</button>
+            </div>
+        </div>
+
+        <div class="table-container" id="tableContainer" style="display:none;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nome na Lista</th>
+                        <th>Tipo</th>
+                        <th>TMDB (filme/série)</th>
+                        <th>Ano</th>
+                        <th>Nota</th>
+                        <th>Gêneros</th>
+                        <th>Descrição</th>
+                        <th>Poster</th>
+                        <th>URL</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="download-btns" id="downloadArea" style="display:none;">
+            <button class="btn btn-primary" id="downloadM3uBtn">📥 Baixar M3U Enriquecido</button>
+            <button class="btn btn-outline" id="downloadCsvBtn">📊 Baixar CSV</button>
+        </div>
+    </main>
+
+    <div class="toast-container" id="toastContainer"></div>
+    <footer class="footer">Dados do TMDB. App não afiliado.</footer>
+
+    <script>
+        (function() {
+            // ===== CONSTANTES =====
+            var TMDB_IMAGE = 'https://image.tmdb.org/t/p/w92';
+            var TMDB_MOVIE_BASE = 'https://www.themoviedb.org/movie/';
+            var TMDB_TV_BASE = 'https://www.themoviedb.org/tv/';
+
+            // ===== ESTADO =====
+            var state = {
+                apiKey: localStorage.getItem('tmdb_api_key') || '',
+                items: [],           // { originalTags, displayName, url, tmdbData, status }
+                isProcessing: false,
+                abortController: null,
+                genreMap: {}         // Cache de gêneros: id -> nome
+            };
+
+            // ===== ELEMENTOS DOM =====
+            var dom = {
+                apiBar: document.getElementById('apiBar'),
+                apiKeyInput: document.getElementById('apiKeyInput'),
+                apiDot: document.getElementById('apiDot'),
+                saveApiBtn: document.getElementById('saveApiBtn'),
+                testApiBtn: document.getElementById('testApiBtn'),
+                toggleApiBtn: document.getElementById('toggleApiBtn'),
+                uploadArea: document.getElementById('uploadArea'),
+                fileInput: document.getElementById('fileInput'),
+                processingArea: document.getElementById('processingArea'),
+                progressLabel: document.getElementById('progressLabel'),
+                progressFill: document.getElementById('progressFill'),
+                cancelBtn: document.getElementById('cancelBtn'),
+                processBtn: document.getElementById('processBtn'),
+                tableContainer: document.getElementById('tableContainer'),
+                tableBody: document.getElementById('tableBody'),
+                downloadArea: document.getElementById('downloadArea'),
+                downloadM3uBtn: document.getElementById('downloadM3uBtn'),
+                downloadCsvBtn: document.getElementById('downloadCsvBtn'),
+                toastContainer: document.getElementById('toastContainer')
+            };
+
+            // ===== UTILITÁRIOS =====
+            function showToast(msg, type) {
+                type = type || '';
+                var t = document.createElement('div');
+                t.className = 'toast ' + type;
+                t.textContent = msg;
+                dom.toastContainer.appendChild(t);
+                setTimeout(function() { if(t.parentNode) t.parentNode.removeChild(t); }, 2800);
+            }
+
+            function updateApiStatus(valid) {
+                dom.apiDot.className = valid ? 'api-status ok' : 'api-status missing';
+            }
+
+            // Buscar lista de gêneros do TMDB (filmes + séries)
+            function fetchGenres() {
+                if (!state.apiKey) return Promise.reject('sem chave');
+                var movieUrl = 'https://api.themoviedb.org/3/genre/movie/list?api_key=' + encodeURIComponent(state.apiKey) + '&language=pt-BR';
+                var tvUrl = 'https://api.themoviedb.org/3/genre/tv/list?api_key=' + encodeURIComponent(state.apiKey) + '&language=pt-BR';
+                return Promise.all([
+                    fetch(movieUrl).then(function(r) { return r.json(); }),
+                    fetch(tvUrl).then(function(r) { return r.json(); })
+                ]).then(function(results) {
+                    var movieGenres = results[0].genres || [];
+                    var tvGenres = results[1].genres || [];
+                    var map = {};
+                    movieGenres.forEach(function(g) { map[g.id] = g.name; });
+                    tvGenres.forEach(function(g) { map[g.id] = g.name; }); // sobrescreve se duplicado, mas não faz mal
+                    state.genreMap = map;
+                    console.log('Gêneros carregados:', Object.keys(map).length);
+                }).catch(function(err) {
+                    console.warn('Erro ao carregar gêneros:', err);
+                });
+            }
+
+            function saveApiKey(key) {
+                key = (key || '').trim();
+                state.apiKey = key;
+                if (key) {
+                    localStorage.setItem('tmdb_api_key', key);
+                    updateApiStatus(true);
+                    dom.apiKeyInput.value = key;
+                    showToast('✅ Chave salva!', 'success');
+                    fetchGenres().then(function() {
+                        showToast('📋 Gêneros atualizados', 'success');
+                    }).catch(function(){});
+                } else {
+                    localStorage.removeItem('tmdb_api_key');
+                    updateApiStatus(false);
+                    showToast('⚠️ Chave removida.');
+                    state.genreMap = {};
+                }
+            }
+
+            // Parse da linha EXTINF
+            function parseExtinf(line) {
+                var tags = {};
+                var commaIndex = line.lastIndexOf(',');
+                var attrPart = '';
+                var displayName = '';
+                if (commaIndex !== -1) {
+                    attrPart = line.substring(0, commaIndex).trim();
+                    displayName = line.substring(commaIndex + 1).trim();
+                } else {
+                    attrPart = line;
+                    displayName = '';
+                }
+                var regex = /([\w-]+)\s*=\s*(?:"([^"]*)"|(\S+))/g;
+                var match;
+                while ((match = regex.exec(attrPart)) !== null) {
+                    var key = match[1];
+                    var value = match[2] !== undefined ? match[2] : match[3];
+                    tags[key] = value;
+                }
+                return { tags: tags, displayName: displayName };
+            }
+
+            function parseM3U(content) {
+                var lines = content.split(/\r?\n/);
+                var entries = [];
+                var currentTags = {};
+                var currentDisplayName = '';
+                for (var i = 0; i < lines.length; i++) {
+                    var trimmed = lines[i].trim();
+                    if (!trimmed) continue;
+                    if (trimmed.indexOf('#EXTINF:') === 0) {
+                        var parsed = parseExtinf(trimmed);
+                        currentTags = parsed.tags;
+                        currentDisplayName = parsed.displayName || (currentTags['tvg-name'] || '');
+                    } else if (trimmed.indexOf('http://') === 0 || trimmed.indexOf('https://') === 0) {
+                        if (currentDisplayName || Object.keys(currentTags).length > 0) {
+                            entries.push({
+                                originalTags: Object.assign({}, currentTags),
+                                displayName: currentDisplayName,
+                                url: trimmed
+                            });
+                        } else {
+                            entries.push({
+                                originalTags: {},
+                                displayName: trimmed,
+                                url: trimmed
+                            });
+                        }
+                        currentTags = {};
+                        currentDisplayName = '';
+                    }
+                }
+                return entries;
+            }
+
+            function cleanNameForSearch(name) {
+                var cleaned = name
+                    .replace(/\[.*?\]/g, '')
+                    .replace(/\(.*?\)/g, '')
+                    .replace(/\b(1080p|720p|4K|2160p|UHD|HD|SD|HDRip|WEBRip|BluRay|BRRip|H264|H265|x264|x265|HEVC|AAC|AC3|DDP|5\.1|7\.1|Atmos|DTS|MP4|MKV|AVI|REMUX|PROPER)\b/gi, '')
+                    .replace(/[-_.]/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                return cleaned || name;
+            }
+
+            function searchTMDB(query, signal) {
+                if (!state.apiKey) throw new Error('API_KEY_MISSING');
+                var url = 'https://api.themoviedb.org/3/search/multi?api_key=' + encodeURIComponent(state.apiKey) +
+                          '&language=pt-BR&query=' + encodeURIComponent(query) + '&page=1';
+                return fetch(url, { signal: signal }).then(function(resp) {
+                    if (!resp.ok) {
+                        if (resp.status === 401 || resp.status === 403) throw new Error('API_KEY_INVALID');
+                        throw new Error('HTTP ' + resp.status);
+                    }
+                    return resp.json();
+                }).then(function(data) {
+                    return data.results || [];
+                });
+            }
+
+            function selectBestResult(results) {
+                if (!results.length) return null;
+                var movieOrTv = results.filter(function(r) {
+                    return r.media_type === 'movie' || r.media_type === 'tv';
+                });
+                return movieOrTv.length ? movieOrTv[0] : results[0];
+            }
+
+            function extractYear(item) {
+                if (item.release_date) return new Date(item.release_date).getFullYear();
+                if (item.first_air_date) return new Date(item.first_air_date).getFullYear();
+                return '';
+            }
+
+            function getCategory(item) {
+                if (item.media_type === 'movie') return 'Filme';
+                if (item.media_type === 'tv') return 'Série';
+                return 'Outro';
+            }
+
+            function getGenreNames(genreIds) {
+                if (!genreIds || !state.genreMap) return [];
+                return genreIds.map(function(id) {
+                    return state.genreMap[id] || '';
+                }).filter(Boolean);
+            }
+
+            function buildEnrichedTags(entry, tmdbResult) {
+                var tags = Object.assign({}, entry.originalTags);
+                var type = tmdbResult.media_type;
+                var officialTitle = tmdbResult.title || tmdbResult.name || '';
+                var year = extractYear(tmdbResult);
+                var rating = tmdbResult.vote_average ? tmdbResult.vote_average.toFixed(1) : '';
+                var posterPath = tmdbResult.poster_path ? TMDB_IMAGE + tmdbResult.poster_path : '';
+                var overview = tmdbResult.overview || '';
+                var genres = getGenreNames(tmdbResult.genre_ids).join(', ');
+
+                tags['tvg-id'] = 'tmdb:' + type + '/' + tmdbResult.id;
+
+                var qualityTags = [];
+                var displayNameFull = entry.displayName || tags['tvg-name'] || '';
+                var matches = displayNameFull.match(/\[.*?\]|\(.*?\)/g);
+                if (matches) {
+                    matches.forEach(function(m) {
+                        if (/^\(\d{4}\)$/.test(m)) return;
+                        qualityTags.push(m);
+                    });
+                }
+                var tvgName = officialTitle;
+                if (year) tvgName += ' (' + year + ')';
+                if (qualityTags.length) tvgName += ' ' + qualityTags.join(' ');
+                tags['tvg-name'] = tvgName;
+                tags['tvg-logo'] = posterPath;
+                if (overview) {
+                    tags['tvg-desc'] = overview;
+                }
+                if (genres) {
+                    tags['tvg-genres'] = genres;
+                }
+                if (!tags['group-title']) {
+                    tags['group-title'] = type === 'movie' ? 'Filmes' : 'Séries';
+                }
+                return tags;
+            }
+
+            function escapeHtml(s) {
+                if (!s) return '';
+                var d = document.createElement('div');
+                d.textContent = s;
+                return d.innerHTML;
+            }
+
+            function truncate(s, max) {
+                if (!s) return '';
+                return s.length > max ? s.substring(0, max-3) + '...' : s;
+            }
+
+            // ===== RENDERIZAÇÃO =====
+            function renderTable() {
+                try {
+                    dom.tableBody.innerHTML = '';
+                    if (state.items.length === 0) {
+                        dom.tableContainer.style.display = 'none';
+                        dom.downloadArea.style.display = 'none';
+                        return;
+                    }
+                    dom.tableContainer.style.display = 'block';
+                    state.items.forEach(function(entry, idx) {
+                        var tr = document.createElement('tr');
+                        var tmdb = entry.tmdbData;
+                        var poster = null;
+                        if (tmdb && tmdb.poster_path) {
+                            poster = TMDB_IMAGE + tmdb.poster_path;
+                        }
+                        var year = tmdb ? extractYear(tmdb) : '-';
+                        var rating = (tmdb && tmdb.vote_average) ? tmdb.vote_average.toFixed(1) : '-';
+                        var tmdbTitle = tmdb ? (tmdb.title || tmdb.name || '') : '';
+                        var overview = tmdb ? (tmdb.overview || '') : '';
+                        var category = tmdb ? getCategory(tmdb) : '';
+                        var status = entry.status;
+                        var genres = tmdb ? getGenreNames(tmdb.genre_ids) : [];
+
+                        var nameDisplay = entry.displayName || (entry.originalTags && entry.originalTags['tvg-name']) || '-';
+                        var tmdbDisplay = '';
+                        if (status === 'loading') tmdbDisplay = '<span style="color:#f6c800;">⏳ Buscando...</span>';
+                        else if (status === 'error') tmdbDisplay = '<span style="color:red;">❌ Erro</span>';
+                        else if (status === 'done' && !tmdb) tmdbDisplay = '<span style="color:red;">❓ Não encontrado</span>';
+                        else if (tmdb) tmdbDisplay = escapeHtml(tmdbTitle);
+
+                        var categoryHtml = '';
+                        if (category === 'Filme') {
+                            categoryHtml = '<span class="category-badge movie">🎬 Filme</span>';
+                        } else if (category === 'Série') {
+                            categoryHtml = '<span class="category-badge tv">📺 Série</span>';
+                        } else if (status === 'loading') {
+                            categoryHtml = '<span style="color:#f6c800;">⏳</span>';
+                        } else if (category === 'Outro') {
+                            categoryHtml = '<span class="category-badge">📼 Outro</span>';
+                        } else {
+                            categoryHtml = '<span style="color:#4a5568;">-</span>';
+                        }
+
+                        var genresHtml = '';
+                        if (genres.length > 0) {
+                            genresHtml = '<div class="genres-cell">' + genres.map(function(g) {
+                                return '<span class="genre-badge">' + escapeHtml(g) + '</span>';
+                            }).join('') + '</div>';
+                        } else if (status === 'loading') {
+                            genresHtml = '<span style="color:#4a5568;">...</span>';
+                        } else {
+                            genresHtml = '<span style="color:#4a5568;">-</span>';
+                        }
+
+                        var descHtml = '';
+                        if (overview) {
+                            descHtml = '<div class="desc-cell"><span class="desc-preview" title="' + escapeHtml(overview) + '">' + escapeHtml(truncate(overview, 100)) + '</span></div>';
+                        } else if (status === 'loading') {
+                            descHtml = '<span style="color:#4a5568;">...</span>';
+                        } else {
+                            descHtml = '<span style="color:#4a5568;">-</span>';
+                        }
+
+                        tr.innerHTML = '<td>' + (idx+1) + '</td>' +
+                            '<td title="' + escapeHtml(nameDisplay) + '">' + escapeHtml(truncate(nameDisplay, 28)) + '</td>' +
+                            '<td>' + categoryHtml + '</td>' +
+                            '<td>' + tmdbDisplay + '</td>' +
+                            '<td>' + year + '</td>' +
+                            '<td>' + (rating !== '-' ? '<span class="rating-badge">⭐ ' + rating + '</span>' : '-') + '</td>' +
+                            '<td>' + genresHtml + '</td>' +
+                            '<td>' + descHtml + '</td>' +
+                            '<td>' + (poster ? '<img class="poster-thumb" src="' + poster + '" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';">' +
+                                '<div class="no-poster-thumb" style="display:none;">🎞️</div>' : '<div class="no-poster-thumb">🎞️</div>') + '</td>' +
+                            '<td class="url-cell"><a href="' + entry.url + '" target="_blank">' + truncate(entry.url, 30) + '</a></td>';
+                        dom.tableBody.appendChild(tr);
+                    });
+                    dom.downloadArea.style.display = state.items.some(function(i) { return i.status === 'done'; }) ? 'flex' : 'none';
+                } catch (err) {
+                    console.error('Erro ao renderizar tabela:', err);
+                    showToast('Erro ao exibir lista.');
+                }
+            }
+
+            // ===== PROCESSAMENTO TMDB =====
+            function processItems() {
+                if (state.isProcessing) return;
+                if (!state.apiKey) {
+                    showToast('⚠️ Insira a chave API do TMDB primeiro.');
+                    return;
+                }
+                if (Object.keys(state.genreMap).length === 0) {
+                    fetchGenres().then(function() {
+                        startProcessing();
+                    }).catch(function() {
+                        startProcessing(); // tenta mesmo sem gêneros
+                    });
+                } else {
+                    startProcessing();
+                }
+            }
+
+            function startProcessing() {
+                state.isProcessing = true;
+                state.abortController = new AbortController();
+                dom.cancelBtn.style.display = 'inline-flex';
+                dom.processBtn.style.display = 'none';
+                var total = state.items.length;
+                var processed = 0;
+                function updateProgress() {
+                    dom.progressLabel.textContent = processed + ' / ' + total + ' processados';
+                    dom.progressFill.style.width = ((processed/total)*100) + '%';
+                }
+                updateProgress();
+
+                function processNext(index) {
+                    if (index >= total || state.abortController.signal.aborted) {
+                        state.isProcessing = false;
+                        dom.cancelBtn.style.display = 'none';
+                        dom.processBtn.style.display = 'none';
+                        if (!state.abortController.signal.aborted) {
+                            showToast('✅ Processamento concluído!', 'success');
+                        }
+                        updateProgress();
+                        renderTable();
+                        return;
+                    }
+                    var entry = state.items[index];
+                    if (entry.status === 'done' || entry.status === 'error') {
+                        processed++;
+                        updateProgress();
+                        renderTable();
+                        processNext(index + 1);
+                        return;
+                    }
+                    entry.status = 'loading';
+                    renderTable();
+                    var queryName = entry.displayName || (entry.originalTags && entry.originalTags['tvg-name']) || '';
+                    var clean = cleanNameForSearch(queryName);
+                    searchTMDB(clean, state.abortController.signal).then(function(results) {
+                        var best = selectBestResult(results);
+                        entry.tmdbData = best;
+                        entry.status = 'done';
+                    }).catch(function(e) {
+                        if (e.name === 'AbortError') return;
+                        console.error(e);
+                        entry.status = 'error';
+                        if (e.message === 'API_KEY_INVALID') {
+                            showToast('🚫 Chave API inválida.');
+                        }
+                    }).finally(function() {
+                        processed++;
+                        updateProgress();
+                        renderTable();
+                        setTimeout(function() { processNext(index + 1); }, 250);
+                    });
+                }
+                processNext(0);
+            }
+
+            function cancelProcessing() {
+                if (state.abortController) {
+                    state.abortController.abort();
+                    state.isProcessing = false;
+                    dom.cancelBtn.style.display = 'none';
+                    dom.processBtn.style.display = 'inline-flex';
+                    showToast('⏹️ Interrompido.');
+                    renderTable();
+                }
+            }
+
+            // ===== EXPORTAÇÃO =====
+            function generateEnrichedM3U() {
+                var output = '#EXTM3U\n';
+                state.items.forEach(function(entry) {
+                    var tags = Object.assign({}, entry.originalTags);
+                    if (entry.tmdbData) {
+                        tags = buildEnrichedTags(entry, entry.tmdbData);
+                    }
+                    var line = '#EXTINF:-1';
+                    var knownKeys = ['tvg-id','tvg-name','tvg-logo','group-title','tvg-desc','tvg-genres'];
+                    knownKeys.forEach(function(key) {
+                        if (tags[key] !== undefined && tags[key] !== '') {
+                            line += ' ' + key + '="' + tags[key] + '"';
+                        }
+                    });
+                    Object.keys(tags).forEach(function(k) {
+                        if (knownKeys.indexOf(k) === -1 && tags[k] !== undefined && tags[k] !== '') {
+                            line += ' ' + k + '="' + tags[k] + '"';
+                        }
+                    });
+                    var displayName = (tags['tvg-name'] || entry.displayName || '').trim();
+                    line += ',' + displayName;
+                    output += line + '\n' + entry.url + '\n';
+                });
+                return output;
+            }
+
+            function downloadM3U() {
+                var content = generateEnrichedM3U();
+                var blob = new Blob([content], {type: 'audio/x-mpegurl'});
+                var a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'lista_enriquecida.m3u';
+                a.click();
+                showToast('📥 M3U baixado!', 'success');
+            }
+
+            function downloadCSV() {
+                var csv = 'Nome Original,tvg-name,tvg-id,tvg-logo,group-title,tvg-desc,tvg-genres,Categoria,URL\n';
+                state.items.forEach(function(entry) {
+                    var tmdb = entry.tmdbData;
+                    var tags = tmdb ? buildEnrichedTags(entry, tmdb) : entry.originalTags;
+                    var original = (entry.displayName || entry.originalTags['tvg-name'] || '').replace(/"/g,'""');
+                    var tvgName = (tags['tvg-name'] || '').replace(/"/g,'""');
+                    var tvgDesc = (tags['tvg-desc'] || '').replace(/"/g,'""');
+                    var tvgGenres = (tags['tvg-genres'] || '').replace(/"/g,'""');
+                    var categoria = tmdb ? getCategory(tmdb) : '';
+                    var line = '"' + original + '","' + tvgName + '","' + (tags['tvg-id']||'') + '","' + (tags['tvg-logo']||'') + '","' + (tags['group-title']||'') + '","' + tvgDesc + '","' + tvgGenres + '","' + categoria + '","' + entry.url + '"';
+                    csv += line + '\n';
+                });
+                var blob = new Blob(['\uFEFF'+csv], {type: 'text/csv;charset=utf-8;'});
+                var a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'lista_tmdb.csv';
+                a.click();
+                showToast('📊 CSV baixado!', 'success');
+            }
+
+            // ===== UPLOAD DE ARQUIVO =====
+            function handleFileUpload(file) {
+                if (!file.name.match(/\.(m3u|m3u8|txt)$/i)) {
+                    showToast('⚠️ Formato inválido. Use .m3u/.m3u8');
+                    return;
+                }
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        var entries = parseM3U(e.target.result);
+                        if (entries.length === 0) {
+                            showToast('ℹ️ Nenhum item encontrado no arquivo.');
+                            return;
+                        }
+                        state.items = entries.map(function(entry) {
+                            return {
+                                originalTags: entry.originalTags,
+                                displayName: entry.displayName,
+                                url: entry.url,
+                                tmdbData: null,
+                                status: 'pending'
+                            };
+                        });
+                        state.abortController = null;
+                        state.isProcessing = false;
+                        dom.processingArea.style.display = 'flex';
+                        dom.processBtn.style.display = 'inline-flex';
+                        dom.cancelBtn.style.display = 'none';
+                        dom.progressLabel.textContent = '0 / ' + state.items.length + ' processados';
+                        dom.progressFill.style.width = '0%';
+                        renderTable();
+                        showToast('📋 ' + state.items.length + ' itens carregados.');
+                    } catch (err) {
+                        console.error('Erro ao processar arquivo:', err);
+                        showToast('Erro ao ler o arquivo. Verifique o formato.');
+                    }
+                };
+                reader.onerror = function() {
+                    showToast('Erro ao ler o arquivo.');
+                };
+                reader.readAsText(file, 'UTF-8');
+            }
+
+            // ===== EVENT LISTENERS =====
+            dom.uploadArea.addEventListener('click', function() { dom.fileInput.click(); });
+            dom.fileInput.addEventListener('change', function(e) {
+                if (e.target.files && e.target.files[0]) handleFileUpload(e.target.files[0]);
+            });
+            dom.uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                dom.uploadArea.classList.add('dragover');
+            });
+            dom.uploadArea.addEventListener('dragleave', function() {
+                dom.uploadArea.classList.remove('dragover');
+            });
+            dom.uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                dom.uploadArea.classList.remove('dragover');
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) handleFileUpload(e.dataTransfer.files[0]);
+            });
+
+            dom.saveApiBtn.addEventListener('click', function() {
+                saveApiKey(dom.apiKeyInput.value);
+            });
+            dom.testApiBtn.addEventListener('click', function() {
+                var key = dom.apiKeyInput.value.trim();
+                if (!key) { showToast('⚠️ Insira uma chave.'); return; }
+                dom.testApiBtn.disabled = true;
+                fetch('https://api.themoviedb.org/3/movie/popular?api_key=' + encodeURIComponent(key) + '&language=pt-BR')
+                    .then(function(resp) {
+                        if (resp.ok) {
+                            saveApiKey(key);
+                            showToast('✅ Chave válida!', 'success');
+                        } else {
+                            showToast('❌ Chave inválida.');
+                            updateApiStatus(false);
+                        }
+                    })
+                    .catch(function() {
+                        showToast('⚠️ Erro de conexão.');
+                    })
+                    .finally(function() {
+                        dom.testApiBtn.disabled = false;
+                    });
+            });
+            dom.apiKeyInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') saveApiKey(dom.apiKeyInput.value);
+            });
+            dom.toggleApiBtn.addEventListener('click', function() {
+                dom.apiBar.classList.toggle('collapsed');
+            });
+            dom.processBtn.addEventListener('click', processItems);
+            dom.cancelBtn.addEventListener('click', cancelProcessing);
+            dom.downloadM3uBtn.addEventListener('click', downloadM3U);
+            dom.downloadCsvBtn.addEventListener('click', downloadCSV);
+
+            // ===== INICIALIZAÇÃO =====
+            if (state.apiKey) {
+                dom.apiKeyInput.value = state.apiKey;
+                updateApiStatus(true);
+                fetchGenres(); // carrega gêneros ao iniciar
+            } else {
+                updateApiStatus(false);
+                dom.apiBar.classList.remove('collapsed');
+            }
+            dom.processingArea.style.display = 'none';
+            dom.tableContainer.style.display = 'none';
+            dom.downloadArea.style.display = 'none';
+        })();
+    </script>
+</body>
+</html>
